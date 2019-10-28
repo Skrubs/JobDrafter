@@ -1,0 +1,148 @@
+/* JavaFX CSS - Leave this comment until you have at least create one rule which uses -fx-Property */
+
+
+
+#mainPane{
+	-fx-background-color: linear-gradient(to top right,DARKGRAY,LIGHTGRAY);
+}
+
+#titleLabel{
+	-fx-translate-y:-100;
+	-fx-font-size: 30;
+	-fx-font-weight:BOLD;
+	-fx-font-style: italic;
+}
+
+#loginButton{
+	-fx-pref-width:120;
+	-fx-pref-height:35;
+	-fx-translate-y:175;
+}
+
+#vLoginBox{
+	-fx-alignment: center;
+	-fx-translate-y:-200;
+}
+
+#loginNameField{
+	-fx-translate-x:0;
+	-fx-translate-y:35;
+	-fx-pref-width:200;
+	-fx-max-width:200;
+	-fx-border-color: LIGHTBLUE;
+	-fx-border-width:2;
+}
+
+#passwordField{
+	-fx-translate-x:0;
+	-fx-translate-y:125;
+	-fx-pref-width:200;
+	-fx-max-width:200;
+	-fx-border-color: LIGHTBLUE;
+	-fx-border-width: 2;
+}
+
+#loginNameLabel{
+	-fx-translate-x:0;
+	-fx-translate-y:0;
+	-fx-font-weight: BOLD;
+}
+
+#passwordLabel{
+	-fx-translate-x:0;
+	-fx-translate-y:100;
+	-fx-font-weight: BOLD;
+}
+
+#selectedAfscLabel{
+	-fx-translate-x:15;
+	-fx-translate-y:20;
+	-fx-font-weight: BOLD;
+}
+
+#selectedRicLabel{
+	-fx-translate-x:280;
+	-fx-translate-y:20;
+	-fx-font-weight: BOLD;
+}
+
+#selectedAfscField{
+	-fx-translate-x:10;
+	-fx-translate-y:35;
+	-fx-pref-width:100;
+	-fx-border-color: LIGHTBLUE;
+}
+
+#selectedRicField{
+	-fx-translate-x:275;
+	-fx-translate-y:35;
+	-fx-pref-width:100;
+	-fx-border-color: LIGHTBLUE;
+}
+
+#flightLabel{
+	-fx-translate-x:1010;
+	-fx-translate-y:41.0;
+	-fx-font-weight: BOLD;
+	-fx-font-size: 120%;
+}
+
+#bookafscButton{
+	-fx-translate-x:130;
+	-fx-translate-y:25;
+	-fx-pref-width:125;
+	-fx-pref-height:60;
+}
+
+#rightPane{
+	-fx-translate-x:1000;
+	-fx-translate-y:50.0;
+	-fx-pref-width:150.0;
+	-fx-pref-height:745.0;
+	-fx-border-color: LIGHTBLUE;
+}
+
+#centerTopPane{
+	-fx-translate-x:400;
+	-fx-translate-y:150;
+	-fx-pref-width:400;
+	-fx-pref-height:100;
+	-fx-border-color: LIGHTBLUE;
+}
+
+#viewAreaLabel{
+	-fx-translate-x:410;
+	-fx-translate-y:290;
+	-fx-font-weight: BOLD;
+}
+
+#viewAreaPane{
+	-fx-translate-x:400;
+	-fx-translate-y:300;
+	-fx-pref-width:400;
+	-fx-pref-height:400;
+	-fx-border-color: LIGHTBLUE;
+}
+
+#viewArea{
+	-fx-translate-x:0;
+	-fx-translate-y:0;
+	-fx-pref-width:400;
+	-fx-pref-height:400;
+	-fx-border-color: LIGHTBLUE;
+}
+
+#afscField{
+	-fx-translate-x:5.0;
+	-fx-translate-y:50.0;
+	-fx-pref-width:150.0;
+	-fx-pref-height:745.0;
+	-fx-border-color: LIGHTBLUE;
+}
+
+#loadJobListButton{
+	-fx-translate-x:45.0;
+	-fx-translate-y:20.0;
+	-fx-pref-width:75.0;
+	-fx-pref-height:20.0;
+}
