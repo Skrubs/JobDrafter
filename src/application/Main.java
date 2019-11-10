@@ -1,24 +1,38 @@
 package application;
 
+import java.io.IOException;
 import java.util.ArrayList;
+
+import org.apache.poi.EncryptedDocumentException;
+import org.apache.poi.openxml4j.util.ZipSecureFile;
+import org.apache.poi.ss.usermodel.DataFormatter;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
 import javafx.application.Application;
+import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
+import javafx.scene.control.ListView;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 /**
- * JobDrafter is a small application written to ease the job
- * of Flight Chiefs in the 369 RCS for drafting jobs
- * for their respected flight.
+ * JobDrafter is a small application written to ease the job of Flight Chiefs in
+ * the 369 RCS for drafting jobs for their respected flight.
+ * 
  * @author Angelo
  *
  */
@@ -48,7 +62,9 @@ public class Main extends Application {
 	private ArrayList<Button> tempFlightList;
 	private Button loginButton;
 	private Button registrationButton;
-	
+	private XSSFWorkbook jobbook;
+	private ListView<Job> jobListView;
+	private ArrayList<Flight> accountsList;
 
 	@Override
 	public void start(Stage primaryStage) {
@@ -56,35 +72,23 @@ public class Main extends Application {
 		window = primaryStage;
 		window.setTitle(title);
 		window.setResizable(false);
-		
+
 		createMainDisplay();
-		
+		accountsList = new ArrayList<>();
+
 		window.setScene(login());
 		window.sizeToScene();
 		window.show();
-		
-		
-		//action for login button
-		loginButton.setOnAction(e->{
-			if(true) {
+
+		// action for login button
+		loginButton.setOnAction(e -> {
+			if (true) {
 				window.setScene(createMainDisplay());
 			}
 		});
-		
-		//Actions for Recruiter buttons
-		for(Button b : tempFlightList) {
-			
-			b.setPrefSize(175, 35);
-			
-			b.setOnAction(e->{
-				selectedRicField.clear();
-				selectedRicField.setText(b.getText());
-			});
-		}
-		
 
 	}
-	
+
 	private Scene login() {
 		VBox vLoginBox = new VBox();
 		vLoginBox.setId("vLoginBox");
@@ -102,9 +106,9 @@ public class Main extends Application {
 		loginNameLabel.setId("loginNameLabel");
 		Label passwordLabel = new Label("Password:");
 		passwordLabel.setId("passwordLabel");
-		vLoginBox.getChildren().addAll(titleLabel,loginNameLabel,loginNameField,passwordLabel,
-								passwordField, loginButton);
-		Scene loginScene = new Scene(vLoginBox,WINDOW_WIDTH, WINDOW_HEIGHT);
+		vLoginBox.getChildren().addAll(titleLabel, loginNameLabel, loginNameField, passwordLabel, passwordField,
+				loginButton);
+		Scene loginScene = new Scene(vLoginBox, WINDOW_WIDTH, WINDOW_HEIGHT);
 		loginScene.getStylesheets().add(style);
 		return loginScene;
 	}
@@ -112,24 +116,24 @@ public class Main extends Application {
 	private Pane createRightPane() {
 		rightPane = new Pane();
 		rightPane.setId("rightPane");
-		
+
 		VBox rightBox = new VBox();
 		rightBox.setId("rightBox");
 		rightBox.setSpacing(10);
 		rightBox.setAlignment(Pos.CENTER);
-		rightBox.setPadding(new Insets(10,5,5,10));
-		
+		rightBox.setPadding(new Insets(10, 5, 5, 10));
+
 		tempFlightList = new ArrayList<>();
-		
-		for(int i = 0; i < 8; i++) {
-			tempFlightList.add(new Button("RIC" + " " + (i+1)));
+
+		for (int i = 0; i < 8; i++) {
+			tempFlightList.add(new Button("RIC" + " " + (i + 1)));
 			tempFlightList.get(i).setPrefSize(100, 30);
 		}
-		
+
 		rightBox.getChildren().addAll(tempFlightList);
-		
+
 		rightPane.getChildren().add(rightBox);
-		
+
 		return rightPane;
 	}
 
@@ -153,8 +157,8 @@ public class Main extends Application {
 		selectedRicField = new TextField();
 		selectedRicField.setId("selectedRicField");
 
-		centerTopPane.getChildren().addAll(bookafscButton,selectedAfscField,selectedRicField,
-										selectedAfscLabel,selectedRicLabel);
+		centerTopPane.getChildren().addAll(bookafscButton, selectedAfscField, selectedRicField, selectedAfscLabel,
+				selectedRicLabel);
 
 		return centerTopPane;
 
@@ -189,6 +193,8 @@ public class Main extends Application {
 		Pane mainPane = new Pane();
 		mainPane.setId("mainPane");
 		mainPane.setPrefSize(mainScene.getWidth(), mainScene.getHeight());
+		jobListView = new ListView<>();
+		jobListView.setId("afscField");
 		afscField = new TextArea();
 		afscField.setId("afscField");
 		afscField.setEditable(false);
@@ -197,12 +203,41 @@ public class Main extends Application {
 		flightLabel = new Label("Flight");
 		flightLabel.setId("flightLabel");
 		viewAreaLabel = new Label("Selected RIC: " + " QW");
-		viewAreaLabel.setId("viewAreaLabel");		
+		viewAreaLabel.setId("viewAreaLabel");
 
-		mainPane.getChildren().addAll(afscField, loadJobListButton, centerBottomPane(), centerTopPane(),
+		mainPane.getChildren().addAll(jobListView, loadJobListButton, centerBottomPane(), centerTopPane(),
 				createRightPane(), flightLabel, viewAreaLabel);
 
 		root.getChildren().add(mainPane);
+		
+		jobListView.setOnMouseClicked(e->{
+			selectedAfscField.clear();
+			if(jobListView.getSelectionModel().getSelectedItem() != null)
+				selectedAfscField.setText(""+jobListView.getSelectionModel().getSelectedItem());
+		});
+
+		// Actions for Recruiter buttons
+		for (Button b : tempFlightList) {
+
+			b.setPrefSize(145, 35);
+
+			b.setOnAction(e -> {
+				selectedRicField.clear();
+				selectedRicField.setText(b.getText());
+			});
+
+			loadJobListButton.setOnAction(e -> {
+				JobListReader jReader = new JobListReader();
+				try {
+					ArrayList<Job> tempList = jReader.readJobListFile(window);
+					jobListView.getItems().setAll(tempList);
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+
+			});
+		}
 
 		return mainScene;
 	}

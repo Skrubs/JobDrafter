@@ -1,6 +1,7 @@
 package application;
 
 
+import java.io.File;
 import java.io.IOException;
 
 import org.apache.poi.EncryptedDocumentException;
@@ -29,10 +30,11 @@ public class WorkBookReader {
 		
 	}
 	
-	public void readWorkBook(Stage window) throws EncryptedDocumentException, IOException {
+	public Sheet readWorkBook(Stage window) throws EncryptedDocumentException, IOException {
 		FileChooser fc = new FileChooser();
-		wb = WorkbookFactory.create(fc.showOpenDialog(window));
-		
+		File file = fc.showOpenDialog(window);
+		wb = WorkbookFactory.create(file);
+		return createSheet(wb);
 	}
 	
 	/**
