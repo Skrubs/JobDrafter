@@ -65,6 +65,16 @@ public class Main extends Application {
 	private XSSFWorkbook jobbook;
 	private ListView<Job> jobListView;
 	private ArrayList<Flight> accountsList;
+	private TextField loginNameField;
+	private TextField passwordField;
+	private VBox vLoginBox;
+	private Scene registrationScene;
+	private TextField registerNameField;
+	private TextField registerPasswordField;
+	private TextField reEnterPasswordField;
+	private Button addRecruiterButton;
+	private Button saveRegisterButton;
+	
 
 	@Override
 	public void start(Stage primaryStage) {
@@ -74,6 +84,7 @@ public class Main extends Application {
 		window.setResizable(false);
 
 		createMainDisplay();
+		login();
 		accountsList = new ArrayList<>();
 
 		window.setScene(login());
@@ -82,15 +93,25 @@ public class Main extends Application {
 
 		// action for login button
 		loginButton.setOnAction(e -> {
+			String loginName = loginNameField.getText();
+			String password = passwordField.getText();
+
 			if (true) {
 				window.setScene(createMainDisplay());
 			}
 		});
 
+	
+
 	}
 
+	/**
+	 * Creates the login scene
+	 * 
+	 * @return
+	 */
 	private Scene login() {
-		VBox vLoginBox = new VBox();
+		vLoginBox = new VBox();
 		vLoginBox.setId("vLoginBox");
 		Label titleLabel = new Label("369RCS Job Drafter");
 		titleLabel.setId("titleLabel");
@@ -98,21 +119,29 @@ public class Main extends Application {
 		loginButton.setId("loginButton");
 		registrationButton = new Button("Register");
 		registrationButton.setId("registrationButton");
-		TextField loginNameField = new TextField();
+		registrationButton.setOnAction(e->{
+			registrationScene();
+		});
+		loginNameField = new TextField();
 		loginNameField.setId("loginNameField");
-		TextField passwordField = new PasswordField();
+		passwordField = new PasswordField();
 		passwordField.setId("passwordField");
 		Label loginNameLabel = new Label("User Name:");
 		loginNameLabel.setId("loginNameLabel");
 		Label passwordLabel = new Label("Password:");
 		passwordLabel.setId("passwordLabel");
 		vLoginBox.getChildren().addAll(titleLabel, loginNameLabel, loginNameField, passwordLabel, passwordField,
-				loginButton);
+				loginButton, registrationButton);
 		Scene loginScene = new Scene(vLoginBox, WINDOW_WIDTH, WINDOW_HEIGHT);
 		loginScene.getStylesheets().add(style);
 		return loginScene;
 	}
 
+	/**
+	 * creates right pane that will be a child of the main display
+	 * 
+	 * @return
+	 */
 	private Pane createRightPane() {
 		rightPane = new Pane();
 		rightPane.setId("rightPane");
@@ -123,12 +152,7 @@ public class Main extends Application {
 		rightBox.setAlignment(Pos.CENTER);
 		rightBox.setPadding(new Insets(10, 5, 5, 10));
 
-		tempFlightList = new ArrayList<>();
-
-		for (int i = 0; i < 8; i++) {
-			tempFlightList.add(new Button("RIC" + " " + (i + 1)));
-			tempFlightList.get(i).setPrefSize(100, 30);
-		}
+		tempFlightList = new ArrayList<Button>();
 
 		rightBox.getChildren().addAll(tempFlightList);
 
@@ -137,6 +161,11 @@ public class Main extends Application {
 		return rightPane;
 	}
 
+	/**
+	 * creates center top pane of the main display
+	 * 
+	 * @return
+	 */
 	private Pane centerTopPane() {
 
 		bookafscButton = new Button("Book AFSC");
@@ -209,11 +238,11 @@ public class Main extends Application {
 				createRightPane(), flightLabel, viewAreaLabel);
 
 		root.getChildren().add(mainPane);
-		
-		jobListView.setOnMouseClicked(e->{
+
+		jobListView.setOnMouseClicked(e -> {
 			selectedAfscField.clear();
-			if(jobListView.getSelectionModel().getSelectedItem() != null)
-				selectedAfscField.setText(""+jobListView.getSelectionModel().getSelectedItem());
+			if (jobListView.getSelectionModel().getSelectedItem() != null)
+				selectedAfscField.setText("" + jobListView.getSelectionModel().getSelectedItem());
 		});
 
 		// Actions for Recruiter buttons
@@ -225,21 +254,62 @@ public class Main extends Application {
 				selectedRicField.clear();
 				selectedRicField.setText(b.getText());
 			});
-
-			loadJobListButton.setOnAction(e -> {
-				JobListReader jReader = new JobListReader();
-				try {
-					ArrayList<Job> tempList = jReader.readJobListFile(window);
-					jobListView.getItems().setAll(tempList);
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-
-			});
 		}
+		
+		loadJobListButton.setOnAction(e -> {
+			JobListReader jReader = new JobListReader();
+			try {
+				ArrayList<Job> tempList = jReader.readJobListFile(window);
+				jobListView.getItems().setAll(tempList);
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+
+		});
+		
 
 		return mainScene;
+	}
+	
+	/**
+	 * creates a new window for registration of a new flight
+	 * @return
+	 */
+	private void registrationScene() {
+		Stage registerStage = new Stage();
+		Pane registerRoot = new Pane();
+		registerRoot.setPrefSize(400, 400);
+		registerStage.setX(window.getX()+20);
+		registerStage.setY(window.getY()+40);
+		registrationScene = new Scene(registerRoot, 400, 400);
+		registrationScene.getStylesheets().add(style);
+		registerNameField = new TextField();
+		registerNameField.setPromptText("User Name");
+		registerNameField.setId("registerNameField");
+		registerPasswordField = new PasswordField();
+		registerPasswordField.setId("registerPasswordField");
+		registerPasswordField.setPromptText("Password");
+		reEnterPasswordField = new PasswordField();
+		reEnterPasswordField.setId("reEnterPasswordField");
+		reEnterPasswordField.setPromptText("Re-Enter Password");
+		saveRegisterButton = new Button("Save");
+		saveRegisterButton.setId("saveRegisterButton");
+		saveRegisterButton.setOnAction(e->{
+			String password = registerPasswordField.getText();
+			String rePassword = reEnterPasswordField.getText();
+			if(password.equals(rePassword)) {
+				loginNameField.setText(registerNameField.getText());
+			}
+		});
+		VBox registerVbox = new VBox();
+		registerVbox.setPadding(new Insets(10,10,10,10));
+		registerVbox.setId("registerVbox");
+		registerVbox.getChildren().addAll(registerNameField,registerPasswordField,
+											reEnterPasswordField,saveRegisterButton);
+		registerRoot.getChildren().add(registerVbox);
+		registerStage.setScene(registrationScene);
+		saveRegisterButton.requestFocus();
+		registerStage.show();
 	}
 
 	public static void main(String[] args) {

@@ -19,6 +19,12 @@
 	-fx-translate-y:175;
 }
 
+#registrationButton{
+	-fx-pref-width:120;
+	-fx-pref-height:35;
+	-fx-translate-y:200;
+}
+
 #vLoginBox{
 	-fx-alignment: center;
 	-fx-translate-y:-200;
@@ -145,4 +151,25 @@
 	-fx-translate-y:20.0;
 	-fx-pref-width:75.0;
 	-fx-pref-height:20.0;
+}
+
+/*REGISTRATION LAYOUT SETTINGS */
+#registerNameField{
+
+}
+#registerPasswordField{
+
+}
+#reEnterPasswordField{
+
+}
+#addRecriuterButton{
+
+}
+#saveRegisterButton{
+	
+}
+#registerVbox{
+	-fx-alignment: center;
+	-fx-spacing: 20;
 }
