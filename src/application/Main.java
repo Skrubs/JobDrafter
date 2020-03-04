@@ -26,14 +26,16 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
+import javafx.scene.media.AudioClip;
 import javafx.stage.FileChooser;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 /**
  * JobDrafter is a small application written to ease the job of Flight Chiefs in
  * the 369 RCS for drafting jobs for their respected flight.
  * 
- * @author Angelo
+ * @author Angelo Barcelona
  *
  */
 
@@ -74,6 +76,8 @@ public class Main extends Application {
 	private TextField reEnterPasswordField;
 	private Button addRecruiterButton;
 	private Button saveRegisterButton;
+	private Button manageFlightButton;
+	
 	
 
 	@Override
@@ -97,6 +101,7 @@ public class Main extends Application {
 			String password = passwordField.getText();
 
 			if (true) {
+				new DraftSounds().playPressButton();
 				window.setScene(createMainDisplay());
 			}
 		});
@@ -104,6 +109,8 @@ public class Main extends Application {
 	
 
 	}
+	
+
 
 	/**
 	 * Creates the login scene
@@ -117,15 +124,19 @@ public class Main extends Application {
 		titleLabel.setId("titleLabel");
 		loginButton = new Button("Login");
 		loginButton.setId("loginButton");
+		new Scaler(loginButton);
 		registrationButton = new Button("Register");
+		new Scaler(registrationButton);
 		registrationButton.setId("registrationButton");
 		registrationButton.setOnAction(e->{
 			registrationScene();
 		});
 		loginNameField = new TextField();
 		loginNameField.setId("loginNameField");
+		new Scaler(loginNameField);
 		passwordField = new PasswordField();
 		passwordField.setId("passwordField");
+		new Scaler(passwordField);
 		Label loginNameLabel = new Label("User Name:");
 		loginNameLabel.setId("loginNameLabel");
 		Label passwordLabel = new Label("Password:");
@@ -170,6 +181,7 @@ public class Main extends Application {
 
 		bookafscButton = new Button("Book AFSC");
 		bookafscButton.setId("bookafscButton");
+		new Scaler(bookafscButton);
 
 		centerTopPane = new Pane();
 		centerTopPane.setId("centerTopPane");
@@ -182,9 +194,11 @@ public class Main extends Application {
 
 		selectedAfscField = new TextField();
 		selectedAfscField.setId("selectedAfscField");
+		new Scaler(selectedAfscField);
 
 		selectedRicField = new TextField();
 		selectedRicField.setId("selectedRicField");
+		new Scaler(selectedRicField);
 
 		centerTopPane.getChildren().addAll(bookafscButton, selectedAfscField, selectedRicField, selectedAfscLabel,
 				selectedRicLabel);
@@ -227,15 +241,23 @@ public class Main extends Application {
 		afscField = new TextArea();
 		afscField.setId("afscField");
 		afscField.setEditable(false);
+		new Scaler(afscField);
 		loadJobListButton = new Button("Load");
 		loadJobListButton.setId("loadJobListButton");
+		new Scaler(loadJobListButton);
 		flightLabel = new Label("Flight");
 		flightLabel.setId("flightLabel");
 		viewAreaLabel = new Label("Selected RIC: " + " QW");
 		viewAreaLabel.setId("viewAreaLabel");
+		manageFlightButton = new Button("Manage Flight");
+		manageFlightButton.setId("manageFlightButton");
+		new Scaler(manageFlightButton);
+		manageFlightButton.setOnAction(e->{
+			manageFlightWindow(new Stage());
+		});
 
 		mainPane.getChildren().addAll(jobListView, loadJobListButton, centerBottomPane(), centerTopPane(),
-				createRightPane(), flightLabel, viewAreaLabel);
+				createRightPane(), flightLabel, viewAreaLabel, manageFlightButton);
 
 		root.getChildren().add(mainPane);
 
@@ -311,6 +333,25 @@ public class Main extends Application {
 		saveRegisterButton.requestFocus();
 		registerStage.show();
 	}
+	
+	//REMOVE AND MAKE ITS OWN CLASS
+	public void manageFlightWindow(Stage stage) {
+	
+		stage.setX(window.getX()+ 300);
+		stage.setY(window.getY()+100);
+		Pane pane = new Pane();
+		Scene scene = new Scene(pane, 400, 400);
+		VBox vBox = new VBox();
+		pane.getChildren().add(vBox);
+		
+		stage.setScene(scene);
+		stage.initModality(Modality.APPLICATION_MODAL);
+		stage.sizeToScene();
+		stage.setTitle("Manage Flight");
+		stage.show();
+	}
+	
+
 
 	public static void main(String[] args) {
 		launch(args);

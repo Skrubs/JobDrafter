@@ -6,6 +6,13 @@
 	-fx-background-color: linear-gradient(to top right,DARKGRAY,LIGHTGRAY);
 }
 
+#manageFlightButton{
+	-fx-translate-x:1010;
+	-fx-translate-y:10;
+	-fx-pref-width:125;
+	-fx-pref-height:20;
+}
+
 #titleLabel{
 	-fx-translate-y:-100;
 	-fx-font-size: 30;
