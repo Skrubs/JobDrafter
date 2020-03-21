@@ -1,9 +1,14 @@
 package application;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
-public class Flight {
+public class Flight implements Serializable {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -3072541613388524574L;
 	private String loginName;
 	private String password;
 	private String flightLetter;
@@ -12,7 +17,7 @@ public class Flight {
 	public Flight(String loginName, String password) {
 		this.loginName = loginName;
 		this.password = password;
-		flightLetter = "";
+		flightLetter = "G";
 		flightList = new ArrayList<>();
 	}
 
@@ -40,6 +45,8 @@ public class Flight {
 		this.flightList = flightList;
 	}
 	
-	
+	public String toString() {
+		return loginName + " " + password;
+	}
 
 }

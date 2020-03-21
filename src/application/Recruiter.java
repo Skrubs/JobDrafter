@@ -15,6 +15,7 @@ public class Recruiter {
 		this.firstName = firstName;
 		this.lastName = lastName;
 		this.ricCode = ricCode;
+		qw = new ArrayList<>();
 	}
 	
 	public ArrayList<Applicant> getQw(){

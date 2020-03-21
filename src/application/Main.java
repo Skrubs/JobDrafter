@@ -1,19 +1,21 @@
 package application;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
+import java.net.URI;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 
-import org.apache.poi.EncryptedDocumentException;
-import org.apache.poi.openxml4j.util.ZipSecureFile;
-import org.apache.poi.ss.usermodel.DataFormatter;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import javafx.application.Application;
-import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Group;
@@ -26,9 +28,6 @@ import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
-import javafx.scene.media.AudioClip;
-import javafx.stage.FileChooser;
-import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 /**
@@ -39,8 +38,12 @@ import javafx.stage.Stage;
  *
  */
 
-public class Main extends Application {
+public class Main extends Application implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -705410687666232160L;
 	private Stage window;
 	private String title = "Barcelona JobDrafter v0.01";
 	public static final double WINDOW_WIDTH = 1200;
@@ -74,14 +77,25 @@ public class Main extends Application {
 	private TextField registerNameField;
 	private TextField registerPasswordField;
 	private TextField reEnterPasswordField;
-	private Button addRecruiterButton;
 	private Button saveRegisterButton;
 	private Button manageFlightButton;
-	
-	
+	private String location = System.getProperty("user.home") + "\\AppData\\Local\\DraftSaves";
 
 	@Override
 	public void start(Stage primaryStage) {
+		
+		accountsList = new ArrayList<>();
+		
+		File createDirectory = new File(location);
+		if(!createDirectory.exists()) {
+			if(createDirectory.mkdir()) {
+				System.out.println("done");
+			}
+		}
+
+		if (new File(location + "\\saved.ser").exists()) {
+			deserialized(accountsList);
+		}
 
 		window = primaryStage;
 		window.setTitle(title);
@@ -89,28 +103,39 @@ public class Main extends Application {
 
 		createMainDisplay();
 		login();
-		accountsList = new ArrayList<>();
+		
 
 		window.setScene(login());
 		window.sizeToScene();
 		window.show();
 
+		window.setOnCloseRequest(e -> {
+			saveState(accountsList);
+		});
+
 		// action for login button
 		loginButton.setOnAction(e -> {
+			boolean loginSuccessful = false;
 			String loginName = loginNameField.getText();
 			String password = passwordField.getText();
+			if (accountsList.size() > 0) {
+				for(Flight f : accountsList) {
+					if(loginName.equals(f.getLoginName())) {
+						if(password.equals(f.getPassword())) {
+							
+							loginSuccessful = true;
+						}
+					}
+				}
+			}
 
-			if (true) {
+			if (loginSuccessful) {
 				new DraftSounds().playPressButton();
 				window.setScene(createMainDisplay());
 			}
 		});
 
-	
-
 	}
-	
-
 
 	/**
 	 * Creates the login scene
@@ -128,7 +153,7 @@ public class Main extends Application {
 		registrationButton = new Button("Register");
 		new Scaler(registrationButton);
 		registrationButton.setId("registrationButton");
-		registrationButton.setOnAction(e->{
+		registrationButton.setOnAction(e -> {
 			registrationScene();
 		});
 		loginNameField = new TextField();
@@ -252,8 +277,9 @@ public class Main extends Application {
 		manageFlightButton = new Button("Manage Flight");
 		manageFlightButton.setId("manageFlightButton");
 		new Scaler(manageFlightButton);
-		manageFlightButton.setOnAction(e->{
-			manageFlightWindow(new Stage());
+		// Manage Flight Button action
+		manageFlightButton.setOnAction(e -> {
+			new ManageFlight(window);
 		});
 
 		mainPane.getChildren().addAll(jobListView, loadJobListButton, centerBottomPane(), centerTopPane(),
@@ -277,7 +303,7 @@ public class Main extends Application {
 				selectedRicField.setText(b.getText());
 			});
 		}
-		
+
 		loadJobListButton.setOnAction(e -> {
 			JobListReader jReader = new JobListReader();
 			try {
@@ -288,21 +314,21 @@ public class Main extends Application {
 			}
 
 		});
-		
 
 		return mainScene;
 	}
-	
+
 	/**
 	 * creates a new window for registration of a new flight
+	 * 
 	 * @return
 	 */
 	private void registrationScene() {
 		Stage registerStage = new Stage();
 		Pane registerRoot = new Pane();
 		registerRoot.setPrefSize(400, 400);
-		registerStage.setX(window.getX()+20);
-		registerStage.setY(window.getY()+40);
+		registerStage.setX(window.getX() + 20);
+		registerStage.setY(window.getY() + 40);
 		registrationScene = new Scene(registerRoot, 400, 400);
 		registrationScene.getStylesheets().add(style);
 		registerNameField = new TextField();
@@ -316,42 +342,58 @@ public class Main extends Application {
 		reEnterPasswordField.setPromptText("Re-Enter Password");
 		saveRegisterButton = new Button("Save");
 		saveRegisterButton.setId("saveRegisterButton");
-		saveRegisterButton.setOnAction(e->{
+		saveRegisterButton.setOnAction(e -> {
 			String password = registerPasswordField.getText();
 			String rePassword = reEnterPasswordField.getText();
-			if(password.equals(rePassword)) {
+			if (password.equals(rePassword)) {
 				loginNameField.setText(registerNameField.getText());
+				accountsList.add(new Flight(registerNameField.getText(),password));
+				
+
+				try {
+					Thread.sleep(500);
+				} catch (InterruptedException e1) {
+					e1.printStackTrace();
+				}
+				registerStage.close();
 			}
 		});
 		VBox registerVbox = new VBox();
-		registerVbox.setPadding(new Insets(10,10,10,10));
+		registerVbox.setPadding(new Insets(10, 10, 10, 10));
 		registerVbox.setId("registerVbox");
-		registerVbox.getChildren().addAll(registerNameField,registerPasswordField,
-											reEnterPasswordField,saveRegisterButton);
+		registerVbox.getChildren().addAll(registerNameField, registerPasswordField, reEnterPasswordField,
+				saveRegisterButton);
 		registerRoot.getChildren().add(registerVbox);
 		registerStage.setScene(registrationScene);
 		saveRegisterButton.requestFocus();
 		registerStage.show();
 	}
-	
-	//REMOVE AND MAKE ITS OWN CLASS
-	public void manageFlightWindow(Stage stage) {
-	
-		stage.setX(window.getX()+ 300);
-		stage.setY(window.getY()+100);
-		Pane pane = new Pane();
-		Scene scene = new Scene(pane, 400, 400);
-		VBox vBox = new VBox();
-		pane.getChildren().add(vBox);
-		
-		stage.setScene(scene);
-		stage.initModality(Modality.APPLICATION_MODAL);
-		stage.sizeToScene();
-		stage.setTitle("Manage Flight");
-		stage.show();
-	}
-	
 
+	private void saveState(ArrayList<Flight> accountList) {
+		try {
+			FileOutputStream fileOut = new FileOutputStream(location + "\\saved.ser");
+			ObjectOutputStream os = new ObjectOutputStream(fileOut);
+			os.writeObject(accountsList);
+			os.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void deserialized(ArrayList<Flight> accountList) {
+		FileInputStream fileInput;
+		try {
+			fileInput = new FileInputStream(location+"\\saved.ser");
+			ObjectInputStream oi = new ObjectInputStream(fileInput);
+		
+				Object o1 = oi.readObject();
+				accountsList = (ArrayList<Flight>)o1;
+				oi.close();
+		} catch ( IOException | ClassNotFoundException e1) {
+			e1.printStackTrace();
+		}
+		
+	}
 
 	public static void main(String[] args) {
 		launch(args);
